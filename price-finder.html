@@ -205,14 +205,14 @@ select option{background:var(--surface2)}
 Smart Search
   </div>
   <div class="nav-tabs">
-    <button class="nav-tab active" onclick="goPage('search',this)">🔍 Szukaj ofert</button>
-    <button class="nav-tab" onclick="goPage('my-offers',this)">📋 Moje oferty</button>
-    <button class="nav-tab" onclick="goPage('margin',this)">📊 Kalkulator marży</button>
-    <button class="nav-tab" onclick="goPage('compare',this)">⚖️ Porównywarka</button>
+    <button class="nav-tab active" onclick="goPage('search',this)"> Szukaj ofert</button>
+    <button class="nav-tab" onclick="goPage('my-offers',this)"> Moje oferty</button>
+    <button class="nav-tab" onclick="goPage('margin',this)"> Kalkulator marży</button>
+    <button class="nav-tab" onclick="goPage('compare',this)"> Porównywarka</button>
   </div>
   <div class="nav-right">
     <span id="key-status"></span>
-    <button class="key-btn" onclick="showModal('api-modal')">⚙️ Klucz API</button>
+    <button class="key-btn" onclick="showModal('api-modal')"> Klucz API</button>
   </div>
 </nav>
 
@@ -221,7 +221,7 @@ Smart Search
 <div class="page" id="page-margin">
   <div class="my-page-inner">
     <div class="page-hdr">
-      <h2>📊 Kalkulator marży</h2>
+      <h2> Kalkulator marży</h2>
       <span style="font-size:13px;color:var(--muted)">Oblicz cenę sprzedaży, marżę i zysk</span>
     </div>
 
@@ -315,7 +315,7 @@ Smart Search
             <div id="res-profit-total" style="font-size:22px;font-weight:700;color:var(--gold)">—</div>
           </div>
         </div>
-        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveCalcToHistory()">💾 Zapisz kalkulację</button>
+        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveCalcToHistory()"> Zapisz kalkulację</button>
       </div>
     </div>
 
@@ -336,8 +336,8 @@ Smart Search
     <div class="page-hdr">
       <h2>⚖️ Porównywarka ofert</h2>
       <div style="display:flex;gap:8px">
-        <button class="btn btn-ghost" onclick="clearCompare()">🗑️ Wyczyść</button>
-        <button class="btn btn-primary" onclick="exportCompare()">📋 Kopiuj zestawienie</button>
+        <button class="btn btn-ghost" onclick="clearCompare()"> Wyczyść</button>
+        <button class="btn btn-primary" onclick="exportCompare()"> Kopiuj zestawienie</button>
       </div>
     </div>
 
@@ -359,7 +359,7 @@ Smart Search
     <!-- Margin calculator inside compare -->
     <div id="compare-margin-section" style="display:none;margin-top:1.25rem">
       <div class="card" style="padding:1.25rem">
-        <h3 style="font-size:14px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:1rem">💰 Kalkulator marży dla porównywanych ofert</h3>
+        <h3 style="font-size:14px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:1rem"> Kalkulator marży dla porównywanych ofert</h3>
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
           <div>
             <label class="lbl">Narzut %</label>
@@ -389,10 +389,10 @@ Smart Search
       <h1 style="color:#fff;font-size:22px;font-weight:600;letter-spacing:.5px">Smart Search <span style="color:#c9a800">by Rubix</span></h1>
       <p style="color:rgba(255,255,255,.55);font-size:14px;max-width:440px;margin:8px auto 0">Wyszukaj produkty MRO po opisie, zdjęciu lub kodzie — AI porówna ceny i znajdzie zamienniki</p>
       <div class="hero-pills">
-        <span class="hero-pill">🔍 Opis produktu</span>
-        <span class="hero-pill">📷 Zdjęcie</span>
-        <span class="hero-pill">🔄 Zamienniki MRO</span>
-        <span class="hero-pill">📋 Moje oferty</span>
+        <span class="hero-pill"> Opis produktu</span>
+        <span class="hero-pill"> Zdjęcie</span>
+        <span class="hero-pill"> Zamienniki MRO</span>
+        <span class="hero-pill"> Moje oferty</span>
       </div>
     </div>
   </div>
@@ -454,13 +454,13 @@ Smart Search
 
     <div class="search-footer">
       <div class="mode-toggle">
-        <button class="mode-btn active" id="mode-offers" onclick="setMode('offers',this)">💰 Oferty cenowe</button>
-        <button class="mode-btn" id="mode-alts" onclick="setMode('alts',this)">🔄 Zamienniki</button>
+        <button class="mode-btn active" id="mode-offers" onclick="setMode('offers',this)"> Oferty cenowe</button>
+        <button class="mode-btn" id="mode-alts" onclick="setMode('alts',this)"> Zamienniki</button>
         <button class="mode-btn" id="mode-both" onclick="setMode('both',this)">✦ Oferty + zamienniki</button>
       </div>
       <div style="display:flex;gap:8px">
         <button class="btn btn-ghost" onclick="clearAll()">Wyczyść</button>
-        <button class="btn btn-primary" id="search-btn" onclick="doSearch()">🔍 Szukaj</button>
+        <button class="btn btn-primary" id="search-btn" onclick="doSearch()"> Szukaj</button>
       </div>
     </div>
   </div>
@@ -485,7 +485,7 @@ Smart Search
 
     <div id="offers-section">
       <div class="results-hdr" style="margin-bottom:.75rem">
-        <h2 style="font-size:15px">💰 Oferty cenowe</h2>
+        <h2 style="font-size:15px"> Oferty cenowe</h2>
       </div>
       <div class="offer-grid" id="offer-grid"></div>
     </div>
@@ -497,7 +497,7 @@ Smart Search
 
     <div id="alts-section" style="display:none">
       <div class="results-hdr" style="margin-bottom:.75rem">
-        <h2 style="font-size:15px">🔄 Zamienniki i alternatywy</h2>
+        <h2 style="font-size:15px"> Zamienniki i alternatywy</h2>
       </div>
       <div class="alt-grid" id="alt-grid"></div>
     </div>
@@ -505,7 +505,7 @@ Smart Search
 
   <!-- HISTORY -->
   <div class="hist-section" id="hist-section" style="display:none">
-    <div class="hist-title">🕐 Ostatnie wyszukiwania</div>
+    <div class="hist-title"> Ostatnie wyszukiwania</div>
     <div class="hist-list" id="hist-list"></div>
   </div>
 </div>
@@ -520,7 +520,7 @@ Smart Search
   </div>
 
   <div class="my-offer-form" id="add-offer-form" style="display:none">
-    <h3>➕ Nowa oferta</h3>
+    <h3> Nowa oferta</h3>
     <div class="g3 mb">
       <div><label class="lbl">Nazwa produktu*</label><input type="text" id="mo-name" placeholder="np. Wiertarka Bosch GSB 18V"></div>
       <div><label class="lbl">Dostawca / sklep*</label><input type="text" id="mo-shop" placeholder="np. Würth Polska"></div>
@@ -537,13 +537,13 @@ Smart Search
     <div class="mb"><label class="lbl">Notatka</label><textarea id="mo-note" style="min-height:60px" placeholder="np. cena netto, ważna do 31.12, minimalne zamówienie 10 szt..."></textarea></div>
     <div style="display:flex;gap:8px;justify-content:flex-end">
       <button class="btn btn-ghost" onclick="hideAddOffer()">Anuluj</button>
-      <button class="btn btn-primary" onclick="saveOffer()">💾 Zapisz ofertę</button>
+      <button class="btn btn-primary" onclick="saveOffer()"> Zapisz ofertę</button>
     </div>
   </div>
 
   <!-- FILTER -->
   <div style="margin-bottom:1rem;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-    <input type="text" id="mo-search" placeholder="🔍 Szukaj w moich ofertach..." style="max-width:320px" oninput="renderMyOffers()">
+    <input type="text" id="mo-search" placeholder=" Szukaj w moich ofertach..." style="max-width:320px" oninput="renderMyOffers()">
     <select id="mo-sort" onchange="renderMyOffers()" style="width:auto">
       <option value="newest">Najnowsze</option>
       <option value="price-asc">Cena rosnąco</option>
