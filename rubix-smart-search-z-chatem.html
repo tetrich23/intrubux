@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rubix Smart Search — Wyszukiwarka Ofert MRO</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#1a1a18;--bg2:#222220;--surface:#2a2a26;--surface2:#313130;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --text:#f0ede6;--muted:#a09e96;--hint:#5a5a56;
+  --gold:#c9a800;--gold2:#a88900;--gold3:#e8c800;
+  --gold-bg:rgba(201,168,0,0.10);--gold-border:rgba(201,168,0,0.25);
+  --accent:var(--gold);--accent-bg:var(--gold-bg);--accent-text:var(--gold);
+  --green:#4caf50;--green-bg:rgba(76,175,80,0.12);
+  --orange:#e07820;--orange-bg:rgba(224,120,32,0.12);
+  --red:#e05040;--red-bg:rgba(224,80,64,0.12);
+  --r:8px;--rl:12px;
+  --sh:0 2px 12px rgba(0,0,0,0.35),0 8px 32px rgba(0,0,0,0.25);
+  --sh-sm:0 1px 4px rgba(0,0,0,0.3);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
+nav{background:#111110;border-bottom:2px solid var(--gold);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:200}
+.nav-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;color:#fff}
+.nav-logo-icon{height:34px;display:flex;align-items:center;justify-content:center}
+.nav-logo-text{color:rgba(255,255,255,.4);font-size:13px;font-weight:400;margin-left:2px}
+.nav-tabs{display:flex;gap:2px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:3px}
+.nav-tab{padding:6px 16px;border:none;background:none;color:rgba(255,255,255,.45);font-size:13px;font-weight:500;cursor:pointer;border-radius:7px;font-family:inherit;transition:all .15s;white-space:nowrap}
+.nav-tab:hover{color:rgba(255,255,255,.8)}
+.nav-tab.active{background:var(--gold);color:#111110;font-weight:700}
+.nav-tab.chat-active{background:rgba(201,168,0,0.2);color:var(--gold);border:1px solid var(--gold-border)}
+.nav-right{display:flex;align-items:center;gap:10px}
+.key-btn{padding:6px 14px;background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-border);border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s}
+.key-btn:hover{background:var(--gold);color:#111110}
+.page{display:none}.page.active{display:block}
+.hero-banner{position:relative;overflow:hidden;background:#111110;border-bottom:1px solid rgba(201,168,0,.2);padding:3rem 1.5rem 2.5rem;text-align:center}
+.hero-banner::before{content:'';position:absolute;inset:0;background-image:radial-gradient(ellipse at 25% 60%,rgba(201,168,0,.15) 0%,transparent 55%),radial-gradient(ellipse at 80% 25%,rgba(201,168,0,.07) 0%,transparent 45%)}
+.hero-cubes{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.hero-cube{position:absolute;border-radius:3px;opacity:.07;animation:floatup linear infinite}
+@keyframes floatup{0%{transform:translateY(110vh) rotate(0deg)}100%{transform:translateY(-20vh) rotate(720deg)}}
+.hero-content{position:relative;z-index:1}
+.hero-banner h1{font-size:22px;font-weight:600;color:#fff;letter-spacing:.5px;margin-bottom:6px}
+.hero-banner p{color:rgba(255,255,255,.45);font-size:14px;max-width:460px;margin:0 auto}
+.hero-pills{display:flex;gap:8px;justify-content:center;margin-top:1.2rem;flex-wrap:wrap}
+.hero-pill{background:rgba(201,168,0,.1);border:1px solid rgba(201,168,0,.2);border-radius:20px;padding:4px 12px;font-size:12px;color:rgba(201,168,0,.75)}
+.search-page-inner,.my-page-inner{max-width:960px;margin:0 auto;padding:2rem 1.25rem}
+.card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--rl);box-shadow:var(--sh);overflow:hidden;margin-bottom:1.25rem}
+.input-tabs{display:flex;border-bottom:1px solid var(--border2);background:var(--surface2)}
+.input-tab{flex:1;padding:13px 10px;border:none;background:none;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;border-bottom:2px solid transparent;transition:all .15s}
+.input-tab:hover{color:var(--text)}
+.input-tab.active{color:var(--gold);border-bottom-color:var(--gold);background:var(--surface)}
+.search-body{padding:1.4rem}
+.panel{display:none}.panel.active{display:block}
+label.lbl{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+textarea,input[type=text],input[type=number],select{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:10px 13px;font-size:14px;color:var(--text);font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s}
+textarea:focus,input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,0,.15)}
+textarea{min-height:78px;resize:vertical}
+select option{background:var(--surface2)}
+.mb{margin-bottom:1rem}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:500px){.g2{grid-template-columns:1fr}}
+.drop-zone{border:2px dashed var(--border2);border-radius:var(--rl);padding:2.5rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg2);position:relative}
+.drop-zone:hover,.drop-zone.over{border-color:var(--gold);background:var(--gold-bg)}
+.drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.drop-icon{font-size:34px;margin-bottom:10px;opacity:.4}
+.drop-text{font-size:14px;color:var(--muted)}.drop-text strong{color:var(--gold)}
+.img-preview{display:none;margin-top:1rem;position:relative;text-align:center}
+.img-preview img{max-height:180px;border-radius:var(--r);border:1px solid var(--border2)}
+.rm-img{position:absolute;top:-8px;right:calc(50% - 90px);background:var(--red);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.filters-bar{border-top:1px solid var(--border);padding:1rem 1.4rem;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:var(--surface2)}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg label{font-size:11px;font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:.4px}
+.fg select,.fg input[type=number]{width:auto;min-width:100px;padding:7px 10px;font-size:13px}
+.price-range{display:flex;align-items:center;gap:6px}
+.price-range input{width:80px}
+.search-footer{padding:1rem 1.4rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface)}
+.mode-toggle{display:flex;gap:6px;flex-wrap:wrap}
+.mode-btn{padding:7px 14px;border:1px solid var(--border2);background:var(--bg2);color:var(--muted);border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s}
+.mode-btn:hover{color:var(--gold);border-color:var(--gold-border)}
+.mode-btn.active{background:var(--gold-bg);color:var(--gold);border-color:var(--gold-border);font-weight:600}
+.btn{padding:10px 22px;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .15s;display:inline-flex;align-items:center;gap:8px}
+.btn-primary{background:var(--gold);color:#111110;box-shadow:0 2px 12px rgba(201,168,0,.3)}
+.btn-primary:hover{background:var(--gold3);box-shadow:0 4px 20px rgba(201,168,0,.5)}
+.btn-primary:active{transform:scale(.98)}
+.btn-primary:disabled{opacity:.4;cursor:default;transform:none;box-shadow:none}
+.btn-ghost{background:var(--bg2);color:var(--muted);border:1px solid var(--border2)}
+.btn-ghost:hover{color:var(--text);border-color:var(--border2);background:var(--bg)}
+.loading{display:none;padding:2rem;text-align:center;background:var(--surface);border:1px solid var(--border2);border-radius:var(--rl);box-shadow:var(--sh)}
+.spinner{width:38px;height:38px;border:3px solid var(--border2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-txt{font-size:14px;color:var(--muted);font-weight:500}
+.loading-sub{font-size:12px;color:var(--hint);margin-top:6px}
+.err-box{display:none;background:var(--red-bg);border:1px solid rgba(224,80,64,.25);border-radius:var(--r);padding:12px 16px;font-size:14px;color:var(--red);margin-bottom:1rem}
+#results{display:none}
+.results-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px}
+.results-hdr h2{font-size:17px;font-weight:700;color:var(--text)}
+.results-meta{font-size:13px;color:var(--muted)}
+.product-card{background:var(--surface);border:1px solid var(--gold-border);border-left:3px solid var(--gold);border-radius:var(--rl);padding:1.4rem;margin-bottom:1.25rem;box-shadow:var(--sh-sm)}
+.product-card h3{font-size:18px;font-weight:700;margin-bottom:6px;color:var(--text)}
+.product-desc{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:12px}
+.ai-about{background:var(--bg2);border-radius:var(--r);padding:1rem;font-size:14px;line-height:1.7;color:var(--text);margin-bottom:12px;border:1px solid var(--border)}
+.ai-about-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--gold2);margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;padding:4px 10px;border-radius:20px;background:var(--bg2);color:var(--muted);border:1px solid var(--border2);cursor:pointer;font-weight:500;transition:all .12s}
+.chip:hover{background:var(--gold);color:#111110;border-color:var(--gold)}
+.offer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-bottom:1.25rem}
+.offer-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--rl);padding:1.1rem;box-shadow:var(--sh-sm);transition:box-shadow .15s,border-color .15s;display:flex;flex-direction:column}
+.offer-card:hover{box-shadow:var(--sh);border-color:rgba(255,255,255,.25)}
+.offer-card.best{border:2px solid var(--gold);background:rgba(201,168,0,.06)}
+.best-badge{display:inline-block;font-size:11px;font-weight:700;background:var(--gold);color:#111110;padding:3px 9px;border-radius:20px;margin-bottom:8px}
+.shop-row{display:flex;align-items:center;gap:7px;margin-bottom:4px}
+.shop-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.shop-name{font-size:13px;font-weight:700;color:var(--text)}
+.offer-name{font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.4;flex:1}
+.offer-price{font-size:24px;font-weight:800;color:var(--gold);margin-bottom:6px}
+.offer-price .cur{font-size:14px;font-weight:500;color:var(--muted)}
+.offer-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.tag{font-size:11px;padding:3px 8px;border-radius:20px;font-weight:500}
+.tag-del{background:var(--gold-bg);color:var(--gold)}
+.tag-ok{background:var(--green-bg);color:var(--green)}
+.tag-low{background:var(--orange-bg);color:var(--orange)}
+.tag-star{background:var(--bg2);color:var(--muted);border:1px solid var(--border2)}
+.offer-note{font-size:11px;color:var(--hint);margin-bottom:10px}
+.offer-actions{display:flex;gap:7px;margin-top:auto;flex-wrap:wrap}
+.btn-sm{padding:7px 13px;font-size:12px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-weight:600;transition:all .15s;display:inline-flex;align-items:center;gap:4px;text-decoration:none}
+.btn-sm-green{background:var(--gold);color:#111110}
+.btn-sm-green:hover{background:var(--gold3)}
+.btn-sm-ghost{background:var(--bg2);color:var(--muted);border:1px solid var(--border2)}
+.btn-sm-ghost:hover{color:var(--text);border-color:var(--border2)}
+.analysis-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--rl);padding:1.25rem;box-shadow:var(--sh-sm);margin-bottom:1.25rem}
+.analysis-card h3{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--gold2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.analysis-text{font-size:14px;color:var(--text);line-height:1.75}
+.alt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-bottom:1.25rem}
+.alt-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:1rem;box-shadow:var(--sh-sm)}
+.alt-card h4{font-size:14px;font-weight:600;margin-bottom:4px;color:var(--text)}
+.alt-card p{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:8px}
+.alt-badge{font-size:11px;padding:3px 8px;border-radius:20px;background:var(--gold-bg);color:var(--gold);font-weight:500;border:1px solid var(--gold-border)}
+.page-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:10px}
+.page-hdr h2{font-size:20px;font-weight:700;color:var(--text)}
+.my-offer-form{background:var(--surface);border:1px solid var(--border2);border-radius:var(--rl);padding:1.4rem;margin-bottom:1.25rem;box-shadow:var(--sh)}
+.my-offer-form h3{font-size:15px;font-weight:600;margin-bottom:1rem;color:var(--muted)}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:600px){.g3{grid-template-columns:1fr}}
+.my-offers-list{display:flex;flex-direction:column;gap:10px}
+.my-offer-item{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:var(--sh-sm);flex-wrap:wrap}
+.my-offer-item:hover{border-color:var(--gold-border)}
+.moi-left h4{font-size:14px;font-weight:600;margin-bottom:2px;color:var(--text)}
+.moi-left p{font-size:13px;color:var(--muted)}
+.moi-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.moi-price{font-size:18px;font-weight:700;color:var(--gold)}
+.del-btn{background:none;border:none;color:var(--hint);cursor:pointer;font-size:16px;padding:4px;border-radius:6px;transition:color .12s}
+.del-btn:hover{color:var(--red)}
+.empty-state{text-align:center;padding:3rem;color:var(--hint);font-size:14px}
+.empty-icon{font-size:40px;margin-bottom:12px;opacity:.3}
+.hist-section{margin-top:1.5rem}
+.hist-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--hint);margin-bottom:8px}
+.hist-list{display:flex;flex-wrap:wrap;gap:7px}
+.hist-item{font-size:13px;padding:5px 12px;border:1px solid var(--border2);border-radius:20px;cursor:pointer;color:var(--muted);background:var(--surface);transition:all .12s;display:flex;align-items:center;gap:5px}
+.hist-item:hover{color:var(--gold);border-color:var(--gold-border)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:999;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--rl);padding:2rem;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5);border:1px solid var(--border2)}
+.modal h2{font-size:18px;font-weight:700;margin-bottom:6px;color:var(--text)}
+.modal p{font-size:13px;color:var(--muted);margin-bottom:1.2rem;line-height:1.6}
+.modal p a{color:var(--gold)}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:1.2rem}
+.modal input{margin-bottom:6px}
+.modal-err{font-size:12px;color:var(--red);margin-bottom:8px;display:none}
+#key-status{font-size:12px;color:var(--gold)}
+#key-status.warn{color:var(--orange)}
+.toast{position:fixed;bottom:22px;right:22px;background:var(--gold);color:#111110;font-size:13px;padding:10px 18px;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9999;font-weight:700}
+.toast.show{opacity:1}
+.section-divider{height:1px;background:var(--border);margin:1.5rem 0}
+#compare-table th{padding:12px 14px;text-align:left;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid var(--gold);white-space:nowrap;background:var(--surface2)}
+#compare-table td{padding:11px 14px;font-size:13px;color:var(--text);border-bottom:1px solid var(--border);vertical-align:top}
+#compare-table tr:hover td{background:var(--surface2)}
+#compare-table .best-cell{color:var(--gold);font-weight:700}
+#compare-table .row-label{font-weight:600;color:var(--muted);white-space:nowrap;background:var(--surface2)!important}
+.compare-remove{background:none;border:none;color:var(--hint);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px}
+.compare-remove:hover{color:var(--red)}
+
+/* ===== AI CHAT WIDGET ===== */
+#ai-chat-wrap{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;align-items:flex-end;gap:12px;z-index:9000;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+#ai-chat-window{width:340px;background:var(--surface);border:1px solid var(--gold-border);border-radius:16px;overflow:hidden;display:none;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.5)}
+#ai-chat-window.open{display:flex}
+.ai-chat-hdr{padding:14px 16px;background:#111110;border-bottom:1px solid var(--gold-border);display:flex;align-items:center;gap:10px}
+.ai-chat-avatar{width:36px;height:36px;border-radius:50%;background:var(--gold-bg);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.ai-chat-info{flex:1}
+.ai-chat-name{font-size:14px;font-weight:700;color:var(--gold)}
+.ai-chat-status{font-size:11px;color:var(--green)}
+.ai-close-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;line-height:1;padding:2px;transition:color .15s}
+.ai-close-btn:hover{color:var(--text)}
+#ai-messages{flex:1;padding:14px;display:flex;flex-direction:column;gap:10px;max-height:300px;overflow-y:auto;scroll-behavior:smooth}
+.ai-msg{max-width:88%;padding:9px 13px;border-radius:16px;word-break:break-word;font-size:13.5px;line-height:1.55}
+.ai-msg.bot{background:var(--surface2);color:var(--text);align-self:flex-start;border-bottom-left-radius:4px}
+.ai-msg.user{background:var(--gold);color:#111110;align-self:flex-end;border-bottom-right-radius:4px;font-weight:500}
+.ai-msg.typing{opacity:.55;font-style:italic;color:var(--muted)}
+.ai-quick-btns{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 10px}
+.ai-quick-btn{font-size:12px;padding:5px 10px;border-radius:20px;background:var(--bg2);color:var(--muted);border:1px solid var(--border2);cursor:pointer;font-family:inherit;transition:all .12s;white-space:nowrap}
+.ai-quick-btn:hover{background:var(--gold-bg);color:var(--gold);border-color:var(--gold-border)}
+.ai-chat-input-row{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--border2);background:var(--bg2)}
+.ai-chat-input-row input{flex:1;font-size:13px;padding:8px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);outline:none;font-family:inherit;transition:border-color .15s}
+.ai-chat-input-row input:focus{border-color:var(--gold)}
+.ai-send-btn{background:var(--gold);border:none;border-radius:50%;width:34px;height:34px;cursor:pointer;color:#111110;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;transition:background .15s}
+.ai-send-btn:hover{background:var(--gold3)}
+.ai-send-btn:disabled{background:var(--hint);cursor:not-allowed}
+.ai-powered{text-align:center;font-size:11px;color:var(--hint);padding:4px 12px 10px}
+#ai-toggle-btn{width:58px;height:58px;border-radius:50%;background:var(--gold);border:2px solid var(--gold3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 20px rgba(201,168,0,.4);transition:transform .15s,background .15s;position:relative}
+#ai-toggle-btn:hover{transform:scale(1.08);background:var(--gold3)}
+.ai-notif-dot{position:absolute;top:1px;right:1px;width:14px;height:14px;border-radius:50%;background:var(--red);border:2px solid #111110;animation:ai-pulse 1.6s infinite}
+@keyframes ai-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
+</style>
+</head>
+<body>
+
+<!-- MODAL API KEY -->
+<div class="modal-overlay" id="api-modal">
+  <div class="modal">
+    <h2>🔑 Klucz API Anthropic</h2>
+    <p>Klucz jest zapisany <strong>tylko w Twojej przeglądarce</strong> — nie trafia nigdzie indziej. Znajdziesz go na <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--accent)">console.anthropic.com</a>.</p>
+    <label class="lbl">Klucz API (zaczyna się od sk-ant-)</label>
+    <input type="password" id="api-key-field" placeholder="sk-ant-api03-..." style="margin-bottom:6px">
+    <div class="modal-err" id="api-key-err">⚠️ Nieprawidłowy klucz — powinien zaczynać się od sk-ant-</div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="hideModal('api-modal')">Anuluj</button>
+      <button class="btn btn-primary" onclick="confirmApiKey()">💾 Zapisz</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-icon" style="background:#1a1a18;border-radius:4px;padding:2px"><svg width="28" height="28" viewBox="0 0 40 16" fill="none"><text x="0" y="13" font-family="Arial Black,Arial" font-weight="900" font-size="15" fill="#c9a800">RUBIX</text></svg></div>
+Smart Search
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="goPage('search',this)"> Szukaj ofert</button>
+    <button class="nav-tab" onclick="goPage('my-offers',this)"> Moje oferty</button>
+    <button class="nav-tab" onclick="goPage('margin',this)"> Kalkulator marży</button>
+    <button class="nav-tab" onclick="goPage('compare',this)"> Porównywarka</button>
+    <button class="nav-tab" onclick="toggleAIChat()" id="nav-chat-btn">💬 Asystent AI</button>
+  </div>
+  <div class="nav-right">
+    <span id="key-status"></span>
+    <button class="key-btn" onclick="showModal('api-modal')"> Klucz API</button>
+  </div>
+</nav>
+
+<!-- ===== AI CHAT WIDGET ===== -->
+<div id="ai-chat-wrap">
+  <div id="ai-chat-window">
+    <div class="ai-chat-hdr">
+      <div class="ai-chat-avatar">🤖</div>
+      <div class="ai-chat-info">
+        <div class="ai-chat-name">Asystent Rubix</div>
+        <div class="ai-chat-status">● online</div>
+      </div>
+      <button class="ai-close-btn" onclick="toggleAIChat()" aria-label="Zamknij">✕</button>
+    </div>
+    <div id="ai-messages">
+      <div class="ai-msg bot">Cześć! Jestem asystentem Rubix Smart Search. Mogę pomóc Ci znaleźć produkty MRO, porównać ceny, wyjaśnić specyfikacje lub doradzić w zakupach B2B. O co chcesz zapytać? 👋</div>
+    </div>
+    <div class="ai-quick-btns" id="ai-quick-btns">
+      <button class="ai-quick-btn" onclick="aiQuick('Jak wyszukać produkt po zdjęciu?')">📷 Szukaj po zdjęciu</button>
+      <button class="ai-quick-btn" onclick="aiQuick('Jak działa kalkulator marży?')">📊 Kalkulator marży</button>
+      <button class="ai-quick-btn" onclick="aiQuick('Jakie są najlepsze zamienniki do produktów MRO?')">🔄 Zamienniki MRO</button>
+    </div>
+    <div class="ai-chat-input-row">
+      <input id="ai-user-input" type="text" placeholder="Napisz pytanie..." onkeydown="if(event.key==='Enter')aiSendMsg()" autocomplete="off"/>
+      <button class="ai-send-btn" id="ai-send-btn" onclick="aiSendMsg()" aria-label="Wyślij">➤</button>
+    </div>
+    <div class="ai-powered">Powered by Claude AI · Rubix Smart Search</div>
+  </div>
+  <button id="ai-toggle-btn" onclick="toggleAIChat()" aria-label="Otwórz czat z asystentem">
+    <span id="ai-btn-icon">🤖</span>
+    <span class="ai-notif-dot" id="ai-notif-dot"></span>
+  </button>
+</div>
+
+<!-- ===== PAGE: KALKULATOR MARŻY ===== -->
+<div class="page" id="page-margin">
+  <div class="my-page-inner">
+    <div class="page-hdr">
+      <h2> Kalkulator marży</h2>
+      <span style="font-size:13px;color:var(--muted)">Oblicz cenę sprzedaży, marżę i zysk</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem">
+      <div class="card" style="padding:1.5rem">
+        <h3 style="font-size:14px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:1.2rem">Dane wejściowe</h3>
+        <div class="mb">
+          <label class="lbl">Nazwa produktu (opcjonalnie)</label>
+          <input type="text" id="calc-name" placeholder="np. Łożysko SKF 6205" oninput="calcMargin()">
+        </div>
+        <div class="mb">
+          <label class="lbl">Cena zakupu netto</label>
+          <div style="position:relative">
+            <input type="number" id="calc-buy" placeholder="0.00" min="0" step="0.01" oninput="calcMargin()" style="padding-right:55px">
+            <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px">PLN</span>
+          </div>
+        </div>
+        <div class="mb">
+          <label class="lbl">Tryb kalkulacji</label>
+          <div style="display:flex;gap:6px">
+            <button class="mode-btn active" id="mode-markup" onclick="setCalcMode('markup',this)">Narzut %</button>
+            <button class="mode-btn" id="mode-margin-pct" onclick="setCalcMode('margin',this)">Marża %</button>
+            <button class="mode-btn" id="mode-sell" onclick="setCalcMode('sell',this)">Cena sprzedaży</button>
+          </div>
+        </div>
+        <div class="mb" id="calc-pct-row">
+          <label class="lbl" id="calc-pct-label">Narzut (%)</label>
+          <div style="position:relative">
+            <input type="number" id="calc-pct" placeholder="0" min="0" step="0.1" oninput="calcMargin()" style="padding-right:35px">
+            <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px">%</span>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+            <button class="chip" onclick="setQuickPct(10)">10%</button>
+            <button class="chip" onclick="setQuickPct(15)">15%</button>
+            <button class="chip" onclick="setQuickPct(20)">20%</button>
+            <button class="chip" onclick="setQuickPct(25)">25%</button>
+            <button class="chip" onclick="setQuickPct(30)">30%</button>
+            <button class="chip" onclick="setQuickPct(50)">50%</button>
+          </div>
+        </div>
+        <div class="mb" id="calc-sell-row" style="display:none">
+          <label class="lbl">Cena sprzedaży netto</label>
+          <div style="position:relative">
+            <input type="number" id="calc-sell" placeholder="0.00" min="0" step="0.01" oninput="calcMargin()" style="padding-right:55px">
+            <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px">PLN</span>
+          </div>
+        </div>
+        <div class="mb">
+          <label class="lbl">VAT</label>
+          <select id="calc-vat" onchange="calcMargin()">
+            <option value="23">23%</option>
+            <option value="8">8%</option>
+            <option value="5">5%</option>
+            <option value="0">0%</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">Ilość (szt.)</label>
+          <input type="number" id="calc-qty" value="1" min="1" step="1" oninput="calcMargin()">
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card" style="padding:1.5rem;border-left:3px solid var(--gold)">
+          <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:6px">Cena sprzedaży netto</div>
+          <div id="res-sell-net" style="font-size:32px;font-weight:800;color:var(--gold)">—</div>
+        </div>
+        <div class="card" style="padding:1.5rem;border-left:3px solid var(--green)">
+          <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:6px">Cena sprzedaży brutto</div>
+          <div id="res-sell-gross" style="font-size:28px;font-weight:700;color:var(--green)">—</div>
+          <div id="res-vat-amount" style="font-size:12px;color:var(--muted);margin-top:4px"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="card" style="padding:1.2rem">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:4px">Marża %</div>
+            <div id="res-margin-pct" style="font-size:22px;font-weight:700;color:var(--text)">—</div>
+          </div>
+          <div class="card" style="padding:1.2rem">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:4px">Narzut %</div>
+            <div id="res-markup-pct" style="font-size:22px;font-weight:700;color:var(--text)">—</div>
+          </div>
+          <div class="card" style="padding:1.2rem">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:4px">Zysk / szt.</div>
+            <div id="res-profit-unit" style="font-size:22px;font-weight:700;color:var(--text)">—</div>
+          </div>
+          <div class="card" style="padding:1.2rem">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:4px">Zysk łącznie</div>
+            <div id="res-profit-total" style="font-size:22px;font-weight:700;color:var(--gold)">—</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveCalcToHistory()"> Zapisz kalkulację</button>
+      </div>
+    </div>
+
+    <div class="card" style="padding:1.25rem" id="calc-history-card" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+        <h3 style="font-size:14px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Historia kalkulacji</h3>
+        <button class="btn-sm btn-sm-ghost" onclick="clearCalcHistory()">Wyczyść</button>
+      </div>
+      <div id="calc-history-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE: PORÓWNYWARKA ===== -->
+<div class="page" id="page-compare">
+  <div class="my-page-inner">
+    <div class="page-hdr">
+      <h2>⚖️ Porównywarka ofert</h2>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="clearCompare()"> Wyczyść</button>
+        <button class="btn btn-primary" onclick="exportCompare()"> Kopiuj zestawienie</button>
+      </div>
+    </div>
+
+    <div id="compare-empty" style="text-align:center;padding:4rem;color:var(--hint)">
+      <div style="font-size:48px;margin-bottom:16px;opacity:.3">⚖️</div>
+      <p style="font-size:15px;margin-bottom:8px">Brak ofert do porównania</p>
+      <p style="font-size:13px">Wyszukaj produkty i kliknij przycisk <strong style="color:var(--gold)">⚖️</strong> przy ofercie aby dodać ją tutaj</p>
+    </div>
+
+    <div id="compare-table-wrap" style="display:none;overflow-x:auto">
+      <table id="compare-table" style="width:100%;border-collapse:collapse;min-width:600px">
+        <thead>
+          <tr id="compare-head" style="background:var(--surface2)"></tr>
+        </thead>
+        <tbody id="compare-body"></tbody>
+      </table>
+    </div>
+
+    <div id="compare-margin-section" style="display:none;margin-top:1.25rem">
+      <div class="card" style="padding:1.25rem">
+        <h3 style="font-size:14px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:1rem"> Kalkulator marży dla porównywanych ofert</h3>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div>
+            <label class="lbl">Narzut %</label>
+            <input type="number" id="cmp-markup" value="20" min="0" step="1" oninput="updateCompareMargins()" style="width:100px">
+          </div>
+          <div>
+            <label class="lbl">VAT %</label>
+            <select id="cmp-vat" onchange="updateCompareMargins()" style="width:80px">
+              <option value="23">23%</option><option value="8">8%</option><option value="5">5%</option><option value="0">0%</option>
+            </select>
+          </div>
+        </div>
+        <div id="compare-margins" style="margin-top:1rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE: SEARCH ===== -->
+<div class="page active" id="page-search">
+  <div class="hero-banner">
+    <div class="hero-cubes" id="hero-cubes"></div>
+    <div class="hero-content">
+      <div style="margin-bottom:20px"><svg viewBox="0 0 160 36" width="160" height="36" xmlns="http://www.w3.org/2000/svg"><text x="0" y="30" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="36" fill="#c9a800" letter-spacing="-1">RUBIX</text></svg></div>
+      <h1 style="color:#fff;font-size:22px;font-weight:600;letter-spacing:.5px">Smart Search <span style="color:#c9a800">by Rubix</span></h1>
+      <p style="color:rgba(255,255,255,.55);font-size:14px;max-width:440px;margin:8px auto 0">Wyszukaj produkty MRO po opisie, zdjęciu lub kodzie — AI porówna ceny i znajdzie zamienniki</p>
+      <div class="hero-pills">
+        <span class="hero-pill"> Opis produktu</span>
+        <span class="hero-pill"> Zdjęcie</span>
+        <span class="hero-pill"> Zamienniki MRO</span>
+        <span class="hero-pill"> Moje oferty</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-page-inner">
+  <div class="card">
+    <div class="input-tabs">
+      <button class="input-tab active" onclick="switchTab('desc',this)"><span>✏️</span> Opis</button>
+      <button class="input-tab" onclick="switchTab('img',this)"><span>📷</span> Zdjęcie</button>
+      <button class="input-tab" onclick="switchTab('code',this)"><span>🔢</span> Kod / EAN</button>
+    </div>
+
+    <div class="search-body">
+      <div class="panel active" id="panel-desc">
+        <div class="mb">
+          <label class="lbl">Opisz szukany produkt</label>
+          <textarea id="desc-input" placeholder="np. wiertarka udarowa 18V bezszczotkowa, kabel HDMI 2m 4K, szafka metalowa 80×40cm, klej epoksydowy dwuskładnikowy..."></textarea>
+        </div>
+        <div class="g2">
+          <div><label class="lbl">Marka / producent</label><input type="text" id="brand-input" placeholder="np. Bosch, DeWalt, Samsung..."></div>
+          <div><label class="lbl">Model</label><input type="text" id="model-input" placeholder="np. GSB 18V-55, Galaxy A54..."></div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-img">
+        <div class="drop-zone" id="drop-zone">
+          <input type="file" id="img-input" accept="image/*" onchange="handleImg(event)">
+          <div class="drop-icon">🖼️</div>
+          <div class="drop-text"><strong>Kliknij lub przeciągnij zdjęcie</strong><br>AI rozpozna produkt automatycznie</div>
+        </div>
+        <div class="img-preview" id="img-preview">
+          <img id="preview-img" src="" alt="">
+          <button class="rm-img" onclick="removeImg()">✕</button>
+        </div>
+        <div style="margin-top:12px"><label class="lbl">Dodatkowe wskazówki</label><input type="text" id="img-hint" placeholder="np. tylko kolor czarny, max 500 PLN, wersja przemysłowa..."></div>
+      </div>
+
+      <div class="panel" id="panel-code">
+        <div class="mb"><label class="lbl">Kod produktu / EAN / nr katalogowy</label><input type="text" id="code-input" placeholder="np. 5901234567891, REF-445-BX, WD40-400..."></div>
+        <div><label class="lbl">Nazwa lub opis (opcjonalnie)</label><input type="text" id="code-desc" placeholder="np. środek do odrdzewiania 400ml aerozol"></div>
+      </div>
+    </div>
+
+    <div class="filters-bar">
+      <div class="fg"><label>Kategoria</label>
+        <select id="f-cat"><option value="">Wszystkie</option><option>Elektronika</option><option>Narzędzia</option><option>Materiały budowlane</option><option>Chemia techniczna</option><option>Meble i wyposażenie</option><option>Akcesoria</option><option>Inne</option></select>
+      </div>
+      <div class="fg"><label>Cena (PLN)</label>
+        <div class="price-range">
+          <input type="number" id="f-pmin" placeholder="od" min="0">
+          <span style="color:var(--hint)">—</span>
+          <input type="number" id="f-pmax" placeholder="do" min="0">
+        </div>
+      </div>
+      <div class="fg"><label>Waluta</label>
+        <select id="f-cur"><option>PLN</option><option>EUR</option><option>USD</option></select>
+      </div>
+    </div>
+
+    <div class="search-footer">
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="mode-offers" onclick="setMode('offers',this)"> Oferty cenowe</button>
+        <button class="mode-btn" id="mode-alts" onclick="setMode('alts',this)"> Zamienniki</button>
+        <button class="mode-btn" id="mode-both" onclick="setMode('both',this)">✦ Oferty + zamienniki</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="clearAll()">Wyczyść</button>
+        <button class="btn btn-primary" id="search-btn" onclick="doSearch()"> Szukaj</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div class="loading-txt" id="loading-txt">🌐 Przeszukuję internet w poszukiwaniu ofert...</div>
+    <div class="loading-sub" id="loading-sub"></div>
+  </div>
+
+  <div class="err-box" id="err-box"></div>
+
+  <div id="results">
+    <div class="results-hdr">
+      <h2 id="res-title">Wyniki</h2>
+      <span class="results-meta" id="res-meta"></span>
+    </div>
+    <div class="product-card" id="product-card"></div>
+    <div id="offers-section">
+      <div class="results-hdr" style="margin-bottom:.75rem">
+        <h2 style="font-size:15px"> Oferty cenowe</h2>
+      </div>
+      <div class="offer-grid" id="offer-grid"></div>
+    </div>
+    <div class="analysis-card" id="analysis-card" style="display:none">
+      <h3>✦ Analiza AI</h3>
+      <div class="analysis-text" id="analysis-text"></div>
+    </div>
+    <div id="alts-section" style="display:none">
+      <div class="results-hdr" style="margin-bottom:.75rem">
+        <h2 style="font-size:15px"> Zamienniki i alternatywy</h2>
+      </div>
+      <div class="alt-grid" id="alt-grid"></div>
+    </div>
+  </div>
+
+  <div class="hist-section" id="hist-section" style="display:none">
+    <div class="hist-title"> Ostatnie wyszukiwania</div>
+    <div class="hist-list" id="hist-list"></div>
+  </div>
+</div>
+</div>
+
+<!-- ===== PAGE: MY OFFERS ===== -->
+<div class="page" id="page-my-offers">
+  <div class="my-page-inner">
+  <div class="page-hdr">
+    <h2>📋 Moje oferty</h2>
+    <button class="btn btn-primary" onclick="showAddOffer()">+ Dodaj ofertę</button>
+  </div>
+
+  <div class="my-offer-form" id="add-offer-form" style="display:none">
+    <h3> Nowa oferta</h3>
+    <div class="g3 mb">
+      <div><label class="lbl">Nazwa produktu*</label><input type="text" id="mo-name" placeholder="np. Wiertarka Bosch GSB 18V"></div>
+      <div><label class="lbl">Dostawca / sklep*</label><input type="text" id="mo-shop" placeholder="np. Würth Polska"></div>
+      <div><label class="lbl">Cena*</label><input type="number" id="mo-price" placeholder="np. 299.99" min="0" step="0.01"></div>
+    </div>
+    <div class="g3 mb">
+      <div><label class="lbl">Waluta</label>
+        <select id="mo-cur"><option>PLN</option><option>EUR</option><option>USD</option></select>
+      </div>
+      <div><label class="lbl">Czas dostawy</label><input type="text" id="mo-delivery" placeholder="np. 2-3 dni robocze"></div>
+      <div><label class="lbl">Nr katalogowy / EAN</label><input type="text" id="mo-code" placeholder="opcjonalnie"></div>
+    </div>
+    <div class="mb"><label class="lbl">Link do oferty</label><input type="text" id="mo-url" placeholder="https://..."></div>
+    <div class="mb"><label class="lbl">Notatka</label><textarea id="mo-note" style="min-height:60px" placeholder="np. cena netto, ważna do 31.12, minimalne zamówienie 10 szt..."></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="hideAddOffer()">Anuluj</button>
+      <button class="btn btn-primary" onclick="saveOffer()"> Zapisz ofertę</button>
+    </div>
+  </div>
+
+  <div style="margin-bottom:1rem;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <input type="text" id="mo-search" placeholder=" Szukaj w moich ofertach..." style="max-width:320px" oninput="renderMyOffers()">
+    <select id="mo-sort" onchange="renderMyOffers()" style="width:auto">
+      <option value="newest">Najnowsze</option>
+      <option value="price-asc">Cena rosnąco</option>
+      <option value="price-desc">Cena malejąco</option>
+      <option value="name">Nazwa A-Z</option>
+    </select>
+  </div>
+
+  <div class="my-offers-list" id="my-offers-list"></div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = "https://api.anthropic.com/v1/messages";
+let currentTab = 'desc';
+let searchMode = 'offers';
+let imageBase64 = null;
+let imageMediaType = 'image/jpeg';
+let history = JSON.parse(localStorage.getItem('sh_history')||'[]');
+let myOffers = JSON.parse(localStorage.getItem('sh_my_offers')||'[]');
+const COLORS = ['#2563eb','#16a34a','#d97706','#9333ea','#dc2626','#0891b2','#ea580c','#4f46e5','#0d9488'];
+
+function getKey(){return localStorage.getItem('sh_api_key')||''}
+function setKey(k){localStorage.setItem('sh_api_key',k)}
+function confirmApiKey(){
+  const v=document.getElementById('api-key-field').value.trim();
+  if(!v.startsWith('sk-ant-')){document.getElementById('api-key-err').style.display='block';return}
+  document.getElementById('api-key-err').style.display='none';
+  setKey(v);updateKeyStatus();hideModal('api-modal');toast('Klucz API zapisany ✓');
+}
+function updateKeyStatus(){
+  const k=getKey(),el=document.getElementById('key-status');
+  if(k){el.textContent='🔑 Klucz aktywny';el.className=''}
+  else{el.textContent='⚠️ Brak klucza';el.className='warn'}
+}
+
+function showModal(id){document.getElementById(id).classList.add('open')}
+function hideModal(id){document.getElementById(id).classList.remove('open')}
+
+function goPage(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(name==='my-offers')renderMyOffers();
+  if(name==='margin'){renderCalcHistory();calcMargin();}
+  if(name==='compare')renderCompare();
+}
+
+function switchTab(t,btn){
+  currentTab=t;
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.input-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+t).classList.add('active');
+  if(btn)btn.classList.add('active');
+}
+
+function setMode(m,btn){
+  searchMode=m;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+}
+
+function handleImg(e){
+  const f=e.target.files[0];if(!f)return;
+  imageMediaType=f.type||'image/jpeg';
+  const r=new FileReader();
+  r.onload=ev=>{imageBase64=ev.target.result.split(',')[1];document.getElementById('preview-img').src=ev.target.result;document.getElementById('img-preview').style.display='block'};
+  r.readAsDataURL(f);
+}
+function removeImg(){imageBase64=null;imageMediaType='image/jpeg';document.getElementById('img-preview').style.display='none';document.getElementById('img-input').value=''}
+
+const dz=document.getElementById('drop-zone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over')});
+dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+dz.addEventListener('drop',e=>{
+  e.preventDefault();dz.classList.remove('over');
+  const f=e.dataTransfer.files[0];
+  if(f&&f.type.startsWith('image/')){imageMediaType=f.type||'image/jpeg';const r=new FileReader();r.onload=ev=>{imageBase64=ev.target.result.split(',')[1];document.getElementById('preview-img').src=ev.target.result;document.getElementById('img-preview').style.display='block'};r.readAsDataURL(f)}
+});
+
+function clearAll(){
+  ['desc-input','brand-input','model-input','img-hint','code-input','code-desc'].forEach(id=>document.getElementById(id).value='');
+  ['f-pmin','f-pmax'].forEach(id=>document.getElementById(id).value='');
+  removeImg();
+  document.getElementById('results').style.display='none';
+  document.getElementById('err-box').style.display='none';
+}
+
+function getQuery(){
+  if(currentTab==='desc'){
+    const d=document.getElementById('desc-input').value.trim();
+    const b=document.getElementById('brand-input').value.trim();
+    const m=document.getElementById('model-input').value.trim();
+    if(!d&&!b&&!m)return null;
+    return{type:'desc',d,b,m};
+  }else if(currentTab==='img'){
+    if(!imageBase64)return null;
+    return{type:'img',hint:document.getElementById('img-hint').value.trim()};
+  }else{
+    const c=document.getElementById('code-input').value.trim();
+    const cd=document.getElementById('code-desc').value.trim();
+    if(!c&&!cd)return null;
+    return{type:'code',c,cd};
+  }
+}
+
+function buildSearchQuery(q){
+  const cat=document.getElementById('f-cat').value;
+  const pmin=document.getElementById('f-pmin').value;
+  const pmax=document.getElementById('f-pmax').value;
+  const cur=document.getElementById('f-cur').value;
+  const wantOffers=searchMode==='offers'||searchMode==='both';
+  const wantAlts=searchMode==='alts'||searchMode==='both';
+
+  let prod='';
+  if(q.type==='desc') prod='"'+q.d+'"'+(q.b?' marka '+q.b:'')+(q.m?' model '+q.m:'');
+  else if(q.type==='img') prod='produkt ze zdjecia'+(q.hint?' ('+q.hint+')':'');
+  else prod='kod/EAN "'+q.c+'"'+(q.cd?' ('+q.cd+')':'');
+
+  let filters='';
+  if(cat) filters+=', kategoria: '+cat;
+  if(pmin||pmax) filters+=', budzet: '+(pmin||0)+'-'+(pmax||'bez limitu')+' '+cur;
+
+  const offersSchema=wantOffers?`,
+  "offers":[{"shop":"nazwa sklepu","offerName":"pelna nazwa produktu","price":123.45,"currency":"${cur}","delivery":"czas dostawy","stock":"dostepny","rating":4.5,"url":"BEZPOSREDNI URL do strony produktu","notes":"uwaga"}],
+  "bestOffer":0,
+  "analysis":"2 zdania analiza"`: '';
+
+  const altsSchema=wantAlts?`,
+  "alternatives":[{"name":"zamiennik","brand":"marka","reason":"dlaczego dobry","priceDiff":"X% tanszy","availability":"dostepnosc PL","searchUrl":"https://www.google.com/search?q=..."}]`:'';
+
+  const prompt='Jestes asystentem zakupowym B2B. Szukasz: '+prod+filters+'.\n\n'
+    +'Wykonaj te kroki:\n'
+    +'1. Wyszukaj "'+prod+' cena kup" - znajdz oferty\n'
+    +'2. Wyszukaj "'+prod+' allegro" - oferty Allegro\n'
+    +'3. Wyszukaj "'+prod+' ceneo sklep" - porownaj ceny\n\n'
+    +'Po zebraniu wynikow odpowiedz WYLACZNIE w JSON bez zadnego tekstu przed ani po:\n'
+    +'{"productName":"pelna nazwa","productDescription":"1 zdanie","aiAbout":"2-3 zdania dla kupujacego B2B"'
+    +offersSchema+altsSchema+'}\n\n'
+    +'WAZNE: W polu url wpisz DOKLADNY link ze stron wynikow wyszukiwania (np https://allegro.pl/oferta/...). '
+    +'Jesli nie masz pewnego URL wpisz pusty string. Nie wymyslaj adresow.';
+
+  return prompt;
+}
+
+async function doSearch(){
+  const key=getKey();
+  if(!key){showModal('api-modal');return}
+  const q=getQuery();
+  if(!q){showErr('Wpisz opis, wgraj zdjecie lub podaj kod produktu.');return}
+
+  showLoading(true);
+  document.getElementById('results').style.display='none';
+  document.getElementById('err-box').style.display='none';
+
+  const steps=['Identyfikacja produktu...','Przeszukiwanie sklepow w internecie...','Porownywanie znalezionych ofert...','Szukanie zamiennikow...','Generowanie raportu...'];
+  let si=0;
+  const si2=setInterval(()=>{if(si<steps.length) document.getElementById('loading-sub').textContent=steps[si++];},2000);
+
+  try{
+    let userPrompt='';
+    if(q.type==='img'&&imageBase64){
+      document.getElementById('loading-sub').textContent='Rozpoznawanie produktu ze zdjecia...';
+      const supportedTypes=['image/jpeg','image/png','image/gif','image/webp'];
+      if(!supportedTypes.includes(imageMediaType)) throw new Error('Nieobslugiwany format zdjecia. Uzyj JPG, PNG, WebP lub GIF.');
+      const imgRes=await fetch(API,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:400,messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:imageMediaType,data:imageBase64}},
+          {type:'text',text:'Zidentyfikuj produkt na zdjeciu. Podaj dokladna nazwe, marke, model, kod katalogowy lub EAN jesli widoczny. Odpowiedz krotko po polsku.'}
+        ]}]})
+      });
+      if(imgRes.ok){
+        const imgData=await imgRes.json();
+        const identified=imgData.content.map(b=>b.text||'').join('');
+        userPrompt=buildSearchQuery({type:'desc',d:identified+(q.hint?' '+q.hint:''),b:'',m:''});
+      }else{userPrompt=buildSearchQuery(q);}
+    }else{userPrompt=buildSearchQuery(q);}
+
+    let loopMessages=[{role:'user',content:userPrompt}];
+    let finalText='';
+    let iterations=0;
+
+    while(iterations<8){
+      iterations++;
+      const res=await fetch(API,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:4000,tools:[{type:'web_search_20250305',name:'web_search',max_uses:6}],messages:loopMessages})
+      });
+      if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||'HTTP '+res.status)}
+      const data=await res.json();
+      const textBlocks=data.content.filter(b=>b.type==='text');
+      const toolBlocks=data.content.filter(b=>b.type==='tool_use');
+      if(data.stop_reason==='end_turn'||toolBlocks.length===0){finalText=textBlocks.map(b=>b.text).join('');break;}
+      const query=toolBlocks[0]?.input?.query||'...';
+      document.getElementById('loading-sub').textContent='Szukam: '+query.slice(0,60)+'...';
+      const toolResults=toolBlocks.map(b=>({type:'tool_result',tool_use_id:b.id,content:[{type:'text',text:'Wyniki dostarczone. Kontynuuj analize i znajdz bezposrednie URL-e produktow.'}]}));
+      loopMessages=[...loopMessages,{role:'assistant',content:data.content},{role:'user',content:toolResults}];
+    }
+
+    clearInterval(si2);
+    if(!finalText) throw new Error('Brak odpowiedzi. Sprobuj ponownie.');
+    const jsonMatch=finalText.match(/\{[\s\S]*\}/);
+    if(!jsonMatch) throw new Error('Blad parsowania wynikow. Sprobuj ponownie.');
+    const parsed=JSON.parse(jsonMatch[0]);
+    showLoading(false);
+    renderResults(parsed,q);
+    saveHistory(q);
+  }catch(e){
+    clearInterval(si2);
+    showLoading(false);
+    showErr('Blad: '+e.message);
+  }
+}
+
+function renderResults(d,q){
+  document.getElementById('res-title').textContent=d.productName||'Wyniki';
+  document.getElementById('res-meta').textContent=`${d.offers?.length||0} ofert znaleziono`;
+  const pc=document.getElementById('product-card');
+  pc.innerHTML=`
+    <h3>${esc(d.productName||'')}</h3>
+    <p class="product-desc">${esc(d.productDescription||'')}</p>
+    ${d.aiAbout?`<div class="ai-about"><div class="ai-about-title">✦ O tym produkcie</div>${esc(d.aiAbout)}</div>`:''}
+    ${d.keywords?.length?`<div class="chips">${d.keywords.map(k=>`<span class="chip" onclick="reuseKw('${esc(k)}')">${esc(k)}</span>`).join('')}</div>`:''}
+  `;
+  const og=document.getElementById('offer-grid');og.innerHTML='';
+  const os=document.getElementById('offers-section');
+  if(d.offers?.length){
+    os.style.display='block';
+    d.offers.forEach((o,i)=>{
+      const best=i===(d.bestOffer??0);
+      const c=COLORS[i%COLORS.length];
+      const el=document.createElement('div');
+      el.className='offer-card'+(best?' best':'');
+      el.innerHTML=`
+        ${best?'<span class="best-badge">⭐ Najlepsza cena</span>':''}
+        <div class="shop-row"><span class="shop-dot" style="background:${c}"></span><span class="shop-name">${esc(o.shop)}</span></div>
+        <div class="offer-name">${esc(o.offerName||'')}</div>
+        <div class="offer-price">${fmt(o.price)}<span class="cur"> ${esc(o.currency||'PLN')}</span></div>
+        <div class="offer-tags">
+          <span class="tag tag-del">🚚 ${esc(o.delivery||'')}</span>
+          <span class="tag ${o.stock?.toLowerCase().includes('brak')?'tag-low':'tag-ok'}">📦 ${esc(o.stock||'')}</span>
+          ${o.rating?`<span class="tag tag-star">★ ${o.rating}</span>`:''}
+        </div>
+        ${o.notes?`<div class="offer-note">${esc(o.notes)}</div>`:''}
+        <div class="offer-actions">
+          <a class="btn-sm btn-sm-green" href="${o.url && o.url.startsWith('http') && !o.url.includes('google.com/search') ? esc(o.url) : 'https://www.google.com/search?q='+encodeURIComponent((o.offerName||'')+' '+o.shop+' kup')}" target="_blank" rel="noopener">${o.url && o.url.startsWith('http') && !o.url.includes('google.com/search') ? '🔗 Przejdź do oferty' : '🔍 Szukaj oferty'}</a>
+          <button class="btn-sm btn-sm-ghost" onclick="copyOffer('${esc(o.shop)}','${fmt(o.price)} ${o.currency||'PLN'}','${esc(o.offerName||'')}')">📋 Kopiuj</button>
+          <button class="btn-sm btn-sm-ghost" onclick="addToCompare({shop:unescape('${escape(o.shop||'')}'),name:unescape('${escape(o.offerName||'')}'),price:${o.price||0},currency:'${o.currency||'PLN'}',url:'${o.url||''}',delivery:'${o.delivery||''}',stock:'${o.stock||''}'})" title="Dodaj do porównywarki">⚖️</button>
+        </div>
+      `;
+      og.appendChild(el);
+    });
+  }else{os.style.display='none'}
+
+  if(d.analysis){document.getElementById('analysis-card').style.display='block';document.getElementById('analysis-text').textContent=d.analysis;}
+  else{document.getElementById('analysis-card').style.display='none'}
+
+  const ag=document.getElementById('alt-grid');ag.innerHTML='';
+  const as2=document.getElementById('alts-section');
+  if(d.alternatives?.length){
+    as2.style.display='block';
+    d.alternatives.forEach(a=>{
+      const el=document.createElement('div');
+      el.className='alt-card';
+      el.innerHTML=`
+        <h4>${esc(a.name||'')}${a.brand?` <span style="font-weight:400;color:var(--muted)">${esc(a.brand)}</span>`:''}</h4>
+        <p>${esc(a.reason||'')}</p>
+        ${a.priceDiff?`<span class="alt-badge">💲 ${esc(a.priceDiff)}</span>`:''}
+        ${a.availability?`<span class="alt-badge" style="margin-left:5px;background:var(--green-bg);color:var(--green)">📦 ${esc(a.availability)}</span>`:''}
+        <div style="margin-top:10px"><a class="btn-sm btn-sm-ghost" style="display:inline-flex" href="https://www.google.com/search?q=${encodeURIComponent((a.name||'')+' '+(a.brand||'')+' cena')}" target="_blank">🔍 Szukaj ceny</a></div>
+      `;
+      ag.appendChild(el);
+    });
+  }else{as2.style.display='none'}
+
+  document.getElementById('results').style.display='block';
+}
+
+function reuseKw(kw){document.getElementById('desc-input').value=kw;switchTab('desc',document.querySelectorAll('.input-tab')[0]);doSearch();}
+function copyOffer(shop,price,name){navigator.clipboard.writeText(`Produkt: ${name}\nDostawca: ${shop}\nCena: ${price}`).then(()=>toast('Skopiowano!'));}
+
+function saveHistory(q){
+  let lbl='';
+  if(q.type==='desc') lbl=q.d||q.b||q.m;
+  else if(q.type==='img') lbl='📷 Zdjęcie';
+  else lbl=q.c||q.cd;
+  if(!lbl)return;
+  history=[lbl,...history.filter(h=>h!==lbl)].slice(0,10);
+  localStorage.setItem('sh_history',JSON.stringify(history));
+  renderHistory();
+}
+function renderHistory(){
+  if(!history.length)return;
+  document.getElementById('hist-section').style.display='block';
+  document.getElementById('hist-list').innerHTML=history.map(h=>`<span class="hist-item" onclick="reuseHist('${esc(h)}')">🕐 ${esc(h)}</span>`).join('');
+}
+function reuseHist(h){document.getElementById('desc-input').value=h;switchTab('desc',document.querySelectorAll('.input-tab')[0]);}
+
+function showAddOffer(){document.getElementById('add-offer-form').style.display='block'}
+function hideAddOffer(){document.getElementById('add-offer-form').style.display='none';['mo-name','mo-shop','mo-price','mo-delivery','mo-code','mo-url','mo-note'].forEach(id=>document.getElementById(id).value='')}
+
+function saveOffer(){
+  const name=document.getElementById('mo-name').value.trim();
+  const shop=document.getElementById('mo-shop').value.trim();
+  const price=parseFloat(document.getElementById('mo-price').value);
+  if(!name||!shop||isNaN(price)){toast('Wypełnij wymagane pola (*)');return}
+  const o={id:Date.now(),name,shop,price,currency:document.getElementById('mo-cur').value,delivery:document.getElementById('mo-delivery').value.trim(),code:document.getElementById('mo-code').value.trim(),url:document.getElementById('mo-url').value.trim(),note:document.getElementById('mo-note').value.trim(),date:new Date().toLocaleDateString('pl-PL')};
+  myOffers.unshift(o);
+  localStorage.setItem('sh_my_offers',JSON.stringify(myOffers));
+  hideAddOffer();renderMyOffers();toast('Oferta zapisana ✓');
+}
+
+function deleteOffer(id){
+  myOffers=myOffers.filter(o=>o.id!==id);
+  localStorage.setItem('sh_my_offers',JSON.stringify(myOffers));
+  renderMyOffers();toast('Usunięto');
+}
+
+function renderMyOffers(){
+  const q=(document.getElementById('mo-search').value||'').toLowerCase();
+  const sort=document.getElementById('mo-sort').value;
+  let list=[...myOffers].filter(o=>!q||o.name.toLowerCase().includes(q)||o.shop.toLowerCase().includes(q)||(o.code&&o.code.toLowerCase().includes(q)));
+  if(sort==='price-asc') list.sort((a,b)=>a.price-b.price);
+  else if(sort==='price-desc') list.sort((a,b)=>b.price-a.price);
+  else if(sort==='name') list.sort((a,b)=>a.name.localeCompare(b.name));
+  const el=document.getElementById('my-offers-list');
+  if(!list.length){el.innerHTML=`<div class="empty-state"><div class="empty-icon">📋</div><p>Brak ofert${q?' spełniających kryteria':''}</p>${!q?'<p style="margin-top:6px;font-size:13px">Kliknij "+ Dodaj ofertę" aby dodać pierwszą ofertę</p>':''}</div>`;return;}
+  el.innerHTML=list.map(o=>`
+    <div class="my-offer-item">
+      <div class="moi-left">
+        <h4>${esc(o.name)}</h4>
+        <p>${esc(o.shop)}${o.delivery?` · 🚚 ${esc(o.delivery)}`:''}${o.code?` · #${esc(o.code)}`:''}${o.date?` · ${o.date}`:''}</p>
+        ${o.note?`<p style="font-size:12px;color:var(--hint);margin-top:2px">${esc(o.note)}</p>`:''}
+      </div>
+      <div class="moi-right">
+        <span class="moi-price">${fmt(o.price)} ${esc(o.currency||'PLN')}</span>
+        ${o.url?`<a class="btn-sm btn-sm-green" href="${esc(o.url)}" target="_blank" rel="noopener">🔗</a>`:''}
+        <button class="del-btn" onclick="deleteOffer(${o.id})" title="Usuń">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showLoading(s){document.getElementById('loading').style.display=s?'block':'none';document.getElementById('search-btn').disabled=s;if(s)document.getElementById('loading-sub').textContent='';}
+function showErr(m){const b=document.getElementById('err-box');b.textContent='⚠️ '+m;b.style.display='block'}
+function fmt(p){if(p==null)return'—';return Number(p).toLocaleString('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey))doSearch()});
+
+// ---- CALC ----
+let calcMode='markup';
+let calcHistory=JSON.parse(localStorage.getItem('sh_calc_history')||'[]');
+
+function setCalcMode(mode,btn){
+  calcMode=mode;
+  document.querySelectorAll('#page-margin .mode-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('calc-pct-row').style.display=mode==='sell'?'none':'block';
+  document.getElementById('calc-sell-row').style.display=mode==='sell'?'block':'none';
+  document.getElementById('calc-pct-label').textContent=mode==='margin'?'Marża (%)':'Narzut (%)';
+  calcMargin();
+}
+function setQuickPct(v){document.getElementById('calc-pct').value=v;calcMargin();}
+function calcMargin(){
+  const buy=parseFloat(document.getElementById('calc-buy').value)||0;
+  const vat=parseFloat(document.getElementById('calc-vat').value)||23;
+  const qty=parseInt(document.getElementById('calc-qty').value)||1;
+  let sellNet=0;
+  if(calcMode==='markup'){const pct=parseFloat(document.getElementById('calc-pct').value)||0;sellNet=buy*(1+pct/100);}
+  else if(calcMode==='margin'){const pct=parseFloat(document.getElementById('calc-pct').value)||0;sellNet=pct>=100?0:buy/(1-pct/100);}
+  else{sellNet=parseFloat(document.getElementById('calc-sell').value)||0;}
+  const sellGross=sellNet*(1+vat/100);
+  const vatAmt=sellGross-sellNet;
+  const profitUnit=sellNet-buy;
+  const profitTotal=profitUnit*qty;
+  const marginPct=sellNet>0?(profitUnit/sellNet*100):0;
+  const markupPct=buy>0?(profitUnit/buy*100):0;
+  const set=(id,val)=>{document.getElementById(id).textContent=val};
+  set('res-sell-net',buy>0?fmt(sellNet)+' PLN':'—');
+  set('res-sell-gross',buy>0?fmt(sellGross)+' PLN':'—');
+  set('res-vat-amount',buy>0?`w tym VAT ${vat}%: ${fmt(vatAmt)} PLN`:'');
+  set('res-margin-pct',buy>0?marginPct.toFixed(1)+'%':'—');
+  set('res-markup-pct',buy>0?markupPct.toFixed(1)+'%':'—');
+  set('res-profit-unit',buy>0?fmt(profitUnit)+' PLN':'—');
+  set('res-profit-total',buy>0?fmt(profitTotal)+' PLN':'—');
+}
+function saveCalcToHistory(){
+  const buy=parseFloat(document.getElementById('calc-buy').value)||0;
+  if(!buy){toast('Wpisz cenę zakupu');return}
+  const name=document.getElementById('calc-name').value.trim()||'Produkt';
+  const entry={id:Date.now(),name,buy,sellNet:parseFloat(document.getElementById('res-sell-net').textContent)||0,date:new Date().toLocaleDateString('pl-PL')};
+  calcHistory=[entry,...calcHistory].slice(0,20);
+  localStorage.setItem('sh_calc_history',JSON.stringify(calcHistory));
+  renderCalcHistory();toast('Kalkulacja zapisana ✓');
+}
+function clearCalcHistory(){calcHistory=[];localStorage.removeItem('sh_calc_history');renderCalcHistory();}
+function renderCalcHistory(){
+  const card=document.getElementById('calc-history-card');
+  if(!calcHistory.length){card.style.display='none';return}
+  card.style.display='block';
+  document.getElementById('calc-history-list').innerHTML=calcHistory.map(e=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:6px">
+      <div>
+        <div style="font-size:14px;font-weight:600">${esc(e.name)}</div>
+        <div style="font-size:12px;color:var(--muted)">Zakup: ${fmt(e.buy)} PLN → Sprzedaż: ${fmt(e.sellNet)} PLN · ${e.date}</div>
+      </div>
+      <button onclick="loadCalc(${e.id})" class="btn-sm btn-sm-ghost">Wczytaj</button>
+    </div>
+  `).join('');
+}
+function loadCalc(id){
+  const e=calcHistory.find(h=>h.id===id);if(!e)return;
+  document.getElementById('calc-name').value=e.name;
+  document.getElementById('calc-buy').value=e.buy;
+  calcMargin();
+  goPage('margin',document.querySelectorAll('.nav-tab')[2]);
+}
+
+// ---- COMPARE ----
+let compareItems=[];
+function addToCompare(offer){
+  if(compareItems.length>=6){toast('Maksymalnie 6 ofert w porównywarce');return}
+  if(compareItems.find(o=>o.shop===offer.shop&&o.price===offer.price)){toast('Ta oferta jest już w porównywarce');return}
+  compareItems.push(offer);toast('Dodano do porównywarki ✓');renderCompare();
+}
+function removeFromCompare(idx){compareItems.splice(idx,1);renderCompare();}
+function clearCompare(){compareItems=[];renderCompare();}
+function renderCompare(){
+  const empty=document.getElementById('compare-empty');
+  const wrap=document.getElementById('compare-table-wrap');
+  const ms=document.getElementById('compare-margin-section');
+  if(!compareItems.length){empty.style.display='block';wrap.style.display='none';ms.style.display='none';return}
+  empty.style.display='none';wrap.style.display='block';ms.style.display='block';
+  const minPrice=Math.min(...compareItems.map(o=>o.price||Infinity));
+  const head=document.getElementById('compare-head');
+  head.innerHTML='<th style="background:var(--surface2);border-bottom:2px solid var(--gold)">Cecha</th>'+
+    compareItems.map((o,i)=>`<th style="background:var(--surface2);border-bottom:2px solid var(--gold)"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span>${esc(o.shop)}</span><button class="compare-remove" onclick="removeFromCompare(${i})">✕</button></div></th>`).join('');
+  const rows=[
+    {label:'Produkt',key:'name'},
+    {label:'Cena netto',key:'price',fmt:v=>v?'<strong style="color:var(--gold)">'+fmt(v)+' PLN</strong>':'—'},
+    {label:'Dostawa',key:'delivery'},
+    {label:'Dostępność',key:'stock'},
+    {label:'Link',key:'url',fmt:(v,o)=>v?`<a href="${esc(v)}" target="_blank" class="btn-sm btn-sm-green" style="display:inline-flex">🔗 Oferta</a>`:'—'},
+  ];
+  document.getElementById('compare-body').innerHTML=rows.map(r=>`
+    <tr><td class="row-label">${r.label}</td>
+    ${compareItems.map((o,i)=>{const val=o[r.key];let cell=r.fmt?r.fmt(val,o):esc(val||'—');const isBest=r.key==='price'&&val===minPrice;return`<td${isBest?' class="best-cell"':''}>${cell}${isBest?' ⭐':''}</td>`;}).join('')}
+    </tr>
+  `).join('');
+  updateCompareMargins();
+}
+function updateCompareMargins(){
+  const markup=parseFloat(document.getElementById('cmp-markup').value)||20;
+  const vat=parseFloat(document.getElementById('cmp-vat').value)||23;
+  document.getElementById('compare-margins').innerHTML=compareItems.map(o=>{
+    const sellNet=(o.price||0)*(1+markup/100);
+    const sellGross=sellNet*(1+vat/100);
+    const profit=sellNet-(o.price||0);
+    return`<div class="card" style="padding:1rem"><div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px">${esc(o.shop)}</div><div style="font-size:11px;color:var(--hint)">Zakup: ${fmt(o.price||0)} PLN</div><div style="font-size:18px;font-weight:700;color:var(--gold);margin:4px 0">${fmt(sellNet)} PLN netto</div><div style="font-size:13px;color:var(--green)">${fmt(sellGross)} PLN brutto</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Zysk: ${fmt(profit)} PLN / szt.</div></div>`;
+  }).join('');
+}
+function exportCompare(){
+  if(!compareItems.length){toast('Brak ofert do eksportu');return}
+  const lines=['PORÓWNANIE OFERT','='.repeat(50),''];
+  compareItems.forEach((o,i)=>{lines.push(`${i+1}. ${o.shop}`);lines.push(`   Produkt:  ${o.name||'—'}`);lines.push(`   Cena:     ${fmt(o.price||0)} ${o.currency||'PLN'}`);lines.push(`   Dostawa:  ${o.delivery||'—'}`);lines.push(`   Dostępność: ${o.stock||'—'}`);lines.push(`   Link:     ${o.url||'—'}`);lines.push('');});
+  const minP=Math.min(...compareItems.map(o=>o.price||Infinity));
+  const best=compareItems.find(o=>o.price===minP);
+  if(best) lines.push(`✓ Najlepsza cena: ${best.shop} — ${fmt(minP)} PLN`);
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>toast('Zestawienie skopiowane ✓'));
+}
+
+// ===== AI CHAT WIDGET =====
+let aiChatOpen = false;
+let aiChatHistory = [];
+let aiQuickShown = true;
+
+function toggleAIChat() {
+  aiChatOpen = !aiChatOpen;
+  const win = document.getElementById('ai-chat-window');
+  const btn = document.getElementById('ai-btn-icon');
+  const dot = document.getElementById('ai-notif-dot');
+  const navBtn = document.getElementById('nav-chat-btn');
+  win.classList.toggle('open', aiChatOpen);
+  btn.textContent = aiChatOpen ? '✕' : '🤖';
+  dot.style.display = aiChatOpen ? 'none' : 'block';
+  navBtn.classList.toggle('chat-active', aiChatOpen);
+  if (aiChatOpen) document.getElementById('ai-user-input').focus();
+}
+
+function aiQuick(text) {
+  document.getElementById('ai-quick-btns').style.display = 'none';
+  aiQuickShown = false;
+  document.getElementById('ai-user-input').value = text;
+  aiSendMsg();
+}
+
+async function aiSendMsg() {
+  const key = getKey();
+  if (!key) { showModal('api-modal'); return; }
+  const input = document.getElementById('ai-user-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  document.getElementById('ai-quick-btns').style.display = 'none';
+  aiAddMsg(text, 'user');
+  aiChatHistory.push({ role: 'user', content: text });
+  input.value = '';
+  document.getElementById('ai-send-btn').disabled = true;
+
+  const typing = aiAddMsg('Piszę...', 'bot typing');
+
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 500,
+        system: `Jesteś pomocnym asystentem Rubix Smart Search — narzędzia do wyszukiwania ofert produktów MRO (Maintenance, Repair, Operations) dla klientów B2B w Polsce.
+Możesz pomagać w:
+- Szukaniu i porównywaniu produktów MRO
+- Wyjaśnianiu jak używać aplikacji (wyszukiwanie po opisie/zdjęciu/kodzie, kalkulator marży, porównywarka)
+- Doradzaniu przy zakupach B2B — ceny, dostawcy, zamienniki
+- Tłumaczeniu specyfikacji technicznych produktów
+Odpowiadaj po polsku, zwięźle i konkretnie. Maksymalnie 3-4 zdania na odpowiedź.`,
+        messages: aiChatHistory
+      })
+    });
+
+    const data = await res.json();
+    typing.remove();
+    const reply = data?.content?.[0]?.text || 'Przepraszam, spróbuj jeszcze raz.';
+    aiAddMsg(reply, 'bot');
+    aiChatHistory.push({ role: 'assistant', content: reply });
+    if (aiChatHistory.length > 20) aiChatHistory = aiChatHistory.slice(-20);
+
+  } catch(e) {
+    typing.remove();
+    aiAddMsg('Błąd połączenia. Sprawdź klucz API.', 'bot');
+  }
+
+  document.getElementById('ai-send-btn').disabled = false;
+  document.getElementById('ai-user-input').focus();
+}
+
+function aiAddMsg(text, cls) {
+  const msgs = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + cls;
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+// HERO CUBES
+(function(){
+  const colors=['#c9a800','#a88900','#e8c800','#d4b200','#f0d400','#b8960a','#dfc000'];
+  const container=document.getElementById('hero-cubes');if(!container)return;
+  for(let i=0;i<18;i++){const d=document.createElement('div');d.className='hero-cube';const sz=Math.random()*28+12;d.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;background:${colors[i%colors.length]};animation-duration:${Math.random()*14+8}s;animation-delay:${Math.random()*-15}s;border-radius:${Math.floor(Math.random()*3)+3}px`;container.appendChild(d);}
+})();
+
+// INIT
+updateKeyStatus();
+renderHistory();
+renderMyOffers();
+renderCalcHistory();
+if(!getKey())showModal('api-modal');
+</script>
+</body>
+</html>
